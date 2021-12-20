@@ -1,5 +1,6 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 
@@ -23,9 +24,9 @@ namespace DBByContextSample.Controllers
             if (companyName.Any())
                 dbName = companyName.ToString();
 
-            string connectionString = $@"Server=DESKTOP-4RC3DKK, 1433;Database={dbName};User=sa;Password=P@ssw0rd@123;";
+            SqlConnectionStringBuilder builder = BuildConnectionString(dbName);
 
-            _dbContext.Database.SetConnectionString(connectionString);
+            _dbContext.Database.SetConnectionString(builder.ConnectionString);
 
             _dbContext.Database.EnsureCreated();
 
@@ -34,6 +35,18 @@ namespace DBByContextSample.Controllers
             _dbContext.SaveChanges();
 
             return Ok(dbName);
+        }
+
+        private static SqlConnectionStringBuilder BuildConnectionString(string dbName)
+        {
+            SqlConnectionStringBuilder builder = new();
+            builder.DataSource = "DESKTOP-4RC3DKK, 1433";
+            builder.InitialCatalog = dbName;
+            builder.Authentication = SqlAuthenticationMethod.SqlPassword;
+            builder.UserID = "sa";
+            builder.Password = "P@ssw0rd@123";
+
+            return builder;
         }
     }
 }
